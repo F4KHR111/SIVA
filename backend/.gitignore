@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+database/*.db
+database/*.sqlite
+!database/.gitkeep
+uploads/*
+!uploads/.gitkeep
+exports/*
+!exports/.gitkeep
+*.xlsx
+*.xls
+*.csv
+*.log

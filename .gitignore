@@ -1,0 +1,97 @@
+# ==========================================
+# Keamanan & File Rahasia (Sensitive / Secrets)
+# ==========================================
+# File konfigurasi environment (kredensial database, JWT secret, API key)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+backend/.env
+frontend/.env
+
+# Pengecualian: Tetap simpan template contoh .env agar orang lain tahu strukturnya
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# ==========================================
+# Database & Data Lokal (Private Data)
+# ==========================================
+# File SQLite / database lokal yang berisi data riil / sensitif
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/database/*.db
+backend/database/*.sqlite
+!backend/database/.gitkeep
+
+# ==========================================
+# File Upload & Export (Data Pengguna / Transaksi)
+# ==========================================
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+backend/exports/*
+!backend/exports/.gitkeep
+
+# Dokumen ekspor spreadsheet yang berisi data riil
+*.xlsx
+*.xls
+*.csv
+
+# ==========================================
+# Dependensi (Dependencies)
+# ==========================================
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# ==========================================
+# Build & Output Distribusi (Distribution)
+# ==========================================
+dist/
+dist-ssr/
+frontend/dist/
+build/
+Dist-Inventaris/
+
+# ==========================================
+# File Biner Besar & Installer Desktop (Binaries)
+# ==========================================
+bin/
+*.exe
+*.msi
+Setup-Inventaris.exe
+
+# ==========================================
+# Logs & Cache
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# IDE & Sistem Operasi
+# ==========================================
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ==========================================
+# Agent / AI Tooling Cache
+# ==========================================
+.agent/
+.gemini/

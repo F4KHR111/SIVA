@@ -1,0 +1,138 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Tabel Barang (Inventaris Utama)
+model Barang {
+  id              Int       @id @default(autoincrement())
+  kode_produk     String    @db.VarChar(255)
+  nama_produk     String    @db.VarChar(255)
+  kategori        String    @db.VarChar(255)
+  sub_kategori    String?   @default("") @db.VarChar(255)
+  satuan          String    @db.VarChar(255)
+  jumlah          Int
+  tanggal_expired String    @db.VarChar(255)
+  tanggal_masuk   String?   @db.VarChar(255)
+  lokasi          String?   @db.VarChar(255)
+  penerima        String?   @default("") @db.VarChar(255)
+  is_no_expired   Int?      @default(0)
+  is_arsip        Int?      @default(0)
+  no_penerimaan   String?   @default("") @db.VarChar(255)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @updatedAt @db.Timestamp(6)
+
+  @@map("barang")
+}
+
+// 2. Tabel Kategori
+model Kategori {
+  id            Int    @id @default(autoincrement())
+  nama_kategori String @unique @db.VarChar(255)
+
+  @@map("kategori")
+}
+
+// 3. Tabel Lokasi / Gudang / Rak
+model Lokasi {
+  id          Int    @id @default(autoincrement())
+  nama_lokasi String @unique @db.VarChar(255)
+
+  @@map("lokasi")
+}
+
+// 4. Tabel Satuan Barang
+model Satuan {
+  id          Int    @id @default(autoincrement())
+  nama_satuan String @unique @db.VarChar(255)
+
+  @@map("satuan")
+}
+
+// 5. Tabel Pengguna (Login, Role, & Keamanan)
+model Users {
+  id             Int       @id @default(autoincrement())
+  username       String    @unique @db.VarChar(255)
+  email          String?   @default("") @db.VarChar(255)
+  password       String    @db.VarChar(255)
+  nama           String    @db.VarChar(255)
+  role           String?   @default("OPERATOR_INVENTARIS") @db.VarChar(50)
+  status         String?   @default("active") @db.VarChar(20)
+  totp_secret    String?   @db.VarChar(255)
+  is_2fa_enabled Int?      @default(0)
+  created_at     DateTime? @default(now()) @db.Timestamp(6)
+
+  @@map("users")
+}
+
+// 6. Tabel Master Nama Barang
+model NamaBarang {
+  id           Int     @id @default(autoincrement())
+  kode         String? @default("") @db.VarChar(255)
+  nama         String  @unique @db.VarChar(255)
+  kategori     String? @default("") @db.VarChar(255)
+  sub_kategori String? @default("") @db.VarChar(255)
+  satuan       String? @default("") @db.VarChar(255)
+  lokasi       String? @default("") @db.VarChar(255)
+
+  @@map("nama_barang")
+}
+
+// 7. Tabel Pemakaian / Pengeluaran Barang
+model Pemakaian {
+  id                Int       @id @default(autoincrement())
+  no_order          String?   @default("") @db.VarChar(255)
+  kode_produk       String    @db.VarChar(255)
+  nama_produk       String    @db.VarChar(255)
+  jumlah            Int
+  tanggal_pemakaian String    @db.VarChar(255)
+  penerima          String?   @default("") @db.VarChar(255)
+  keterangan        String?   @db.Text
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+
+  @@map("pemakaian")
+}
+
+// 8. Tabel Sub Kategori
+model SubKategori {
+  id                Int    @id @default(autoincrement())
+  kategori_id       Int
+  nama_sub_kategori String @db.VarChar(255)
+
+  @@unique([kategori_id, nama_sub_kategori], map: "unique_kategori_sub")
+  @@map("sub_kategori")
+}
+
+// 9. Tabel Pengaturan / Setting
+model Pengaturan {
+  key_name   String  @id @db.VarChar(255)
+  value_text String? @db.Text
+
+  @@map("pengaturan")
+}
+
+// 10. Tabel Matriks Izin Menu
+model RolePermissions {
+  id         Int    @id @default(autoincrement())
+  role       String @db.VarChar(50)
+  menu_key   String @db.VarChar(100)
+  is_visible Int?   @default(1)
+
+  @@unique([role, menu_key], map: "unique_role_menu")
+  @@map("role_permissions")
+}
+
+// 11. Tabel Izin Kategori per Role
+model RoleCategories {
+  id            Int    @id @default(autoincrement())
+  role          String @db.VarChar(50)
+  nama_kategori String @db.VarChar(255)
+
+  @@unique([role, nama_kategori], map: "unique_role_kat")
+  @@map("role_categories")
+}

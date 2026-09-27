@@ -1,0 +1,38 @@
+========================================================================
+    PETUNJUK PENGGUNAAN & KONFIGURASI MYSQL - SISTEM INVENTARIS
+========================================================================
+
+Aplikasi ini menggunakan Database MySQL lokal (`inventaris_db`).
+
+------------------------------------------------------------------------
+KONFIGURASI DATABASE MYSQL:
+------------------------------------------------------------------------
+- Host     : localhost (127.0.0.1)
+- Port     : 3306
+- User     : root
+- Password : Keluarga123
+- Database : inventaris_db
+
+------------------------------------------------------------------------
+CARA PENGGUNAAN:
+------------------------------------------------------------------------
+1. Pastikan Service MySQL di laptop/PC Anda sudah aktif pada port 3306.
+2. Untuk MENJALANKAN Aplikasi:
+   - Cukup klik ganda (double-click) file: 
+     >>  "Mulai-Aplikasi.vbs"
+   - Aplikasi backend akan berjalan secara otomatis dan membuka antarmuka browser.
+
+3. Untuk MENGHENTIKAN Aplikasi (jika sudah selesai):
+   - Klik ganda (double-click) file:
+     >>  "Matikan-Aplikasi.bat"
+
+------------------------------------------------------------------------
+KEAMANAN DATA:
+------------------------------------------------------------------------
+- Seluruh data tersimpan aman di database MySQL `inventaris_db`.
+- Hasil ekspor Excel tetap disimpan di:
+  `C:\Users\[NamaUser]\Documents\InventarisGedungAgung\exports\`
+
+========================================================================
+Sistem Inventaris - Istana Kepresidenan Yogyakarta
+========================================================================
