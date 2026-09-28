@@ -78,19 +78,21 @@ routeList.forEach(([routePath, handler]) => {
 });
 
 
-// Serve static frontend files (jika ada build lokal)
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static frontend files (hanya jika berjalan di lokal / desktop mandiri)
+if (!process.env.VERCEL) {
+    app.use(express.static(path.join(__dirname, "public")));
 
-// Fallback: serve index.html untuk SPA production build lokal
-const indexPath = path.join(__dirname, "public", "index.html");
-if (require("fs").existsSync(indexPath)) {
-    app.use((req, res, next) => {
-        if (req.method === "GET" && !req.path.startsWith("/api")) {
-            res.sendFile(indexPath);
-        } else {
-            next();
-        }
-    });
+    // Fallback: serve index.html untuk SPA production build lokal
+    const indexPath = path.join(__dirname, "public", "index.html");
+    if (require("fs").existsSync(indexPath)) {
+        app.use((req, res, next) => {
+            if (req.method === "GET" && !req.path.startsWith("/api")) {
+                res.sendFile(indexPath);
+            } else {
+                next();
+            }
+        });
+    }
 }
 
 // Port
