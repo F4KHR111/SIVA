@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../api";
 
 const AuthContext = createContext();
 
-const API_AUTH = "http://localhost:3000/api/auth";
+const API_AUTH = `${API_BASE_URL.replace(/\/+$/, "")}/auth`;
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(() => {
