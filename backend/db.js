@@ -8,15 +8,13 @@ if (isPostgres) {
     // KONFIGURASI POSTGRESQL (Vercel Postgres / Neon / Supabase)
     // ==============================================================
     const { Pool } = require("pg");
-    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL;
 
     const pool = new Pool({
         connectionString: pgUrl,
-        ssl: pgUrl.includes("sslmode=require") || isProduction
-            ? { rejectUnauthorized: false }
-            : false,
-        max: 10,
-        idleTimeoutMillis: 30000
+        ssl: { rejectUnauthorized: false },
+        max: 5,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000
     });
 
     pool.on("error", (err) => {
@@ -102,7 +100,6 @@ if (isPostgres) {
             params = params || [];
             let convertedSql = convertSqliteToPostgres(sql);
 
-            // Jika query berupa INSERT dan belum memiliki RETURNING, tambahkan RETURNING id
             const isInsert = /^\s*INSERT\s+INTO/i.test(convertedSql);
             if (isInsert && !/RETURNING/i.test(convertedSql)) {
                 convertedSql += " RETURNING id";
@@ -135,6 +132,31 @@ if (isPostgres) {
     };
 
     console.log("Database driver: PostgreSQL (Vercel Postgres / Cloud)");
+} else if (process.env.VERCEL) {
+    // ==============================================================
+    // FALLBACK AMAN JIKA DI VERCEL TETAPI DATABASE_URL BELUM DI-SET
+    // ==============================================================
+    console.warn("⚠️ PERINGATAN: Berjalan di Vercel tapi DATABASE_URL belum diatur. Harap pasang Vercel Postgres.");
+    const notConnectedErr = new Error("Database belum terhubung di Vercel. Pastikan Vercel Postgres sudah di-connect ke project ini.");
+
+    db = {
+        isPostgres: false,
+        all(sql, params, cb) {
+            if (typeof params === "function") cb = params;
+            if (typeof cb === "function") cb(notConnectedErr, []);
+        },
+        get(sql, params, cb) {
+            if (typeof params === "function") cb = params;
+            if (typeof cb === "function") cb(notConnectedErr, null);
+        },
+        run(sql, params, cb) {
+            if (typeof params === "function") cb = params;
+            if (typeof cb === "function") cb.call({ lastID: 0, changes: 0 }, notConnectedErr);
+        },
+        serialize(fn) {
+            if (typeof fn === "function") fn();
+        }
+    };
 } else {
     // ==============================================================
     // KONFIGURASI MYSQL (Lokal / XAMPP)

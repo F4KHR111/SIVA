@@ -4,9 +4,9 @@ const path = require("path");
 
 const db = require("./db");
 
-// Hanya inisialisasi tabel via initDatabase jika menggunakan MySQL lokal
+// initDatabase hanya dijalankan jika di lokal (bukan Vercel) dan MySQL aktif
 const pgUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL;
-if (!pgUrl) {
+if (!process.env.VERCEL && !pgUrl) {
     require("./initDatabase");
 }
 
@@ -28,12 +28,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Root Endpoint (Tampilan saat membuka URL backend langsung di browser)
+app.get("/", (req, res) => {
+    res.json({
+        name: "SIVA API Server",
+        status: "online",
+        database: db.isPostgres 
+            ? "PostgreSQL (Vercel Postgres Terhubung)" 
+            : (process.env.VERCEL ? "Perhatian: Vercel Postgres Belum Terhubung di Environment Variables" : "MySQL (Lokal)"),
+        health: "/api/health",
+        version: "1.0.0",
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health Check Endpoint (berguna untuk verifikasi deployment Vercel)
 app.get("/api/health", (req, res) => {
     res.json({
         status: "ok",
         message: "SIVA API Backend siap dan berjalan",
-        database: db.isPostgres ? "PostgreSQL (Vercel/Cloud)" : "MySQL (Lokal)",
+        database: db.isPostgres 
+            ? "PostgreSQL (Vercel/Cloud)" 
+            : (process.env.VERCEL ? "Perhatian: DATABASE_URL belum diset di Vercel" : "MySQL (Lokal)"),
         timestamp: new Date().toISOString()
     });
 });
@@ -70,7 +86,6 @@ if (require("fs").existsSync(indexPath)) {
 const PORT = process.env.PORT || 3000;
 
 // Jalankan listener HTTP server hanya jika berjalan di lingkungan lokal/server mandiri
-// (Di Vercel Serverless, Vercel yang akan menangani pemanggilan request secara otomatis)
 if (!process.env.VERCEL) {
     app.listen(PORT, "0.0.0.0", () => {
         console.log(`Server berjalan di http://0.0.0.0:${PORT}`);
