@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { generateSecret, verifySync, generateURI } = require("otplib");
+const { generateSecret, verifySync, generateURI } = require("../utils/totp");
 const qrcode = require("qrcode");
 const db = require("../db");
 
