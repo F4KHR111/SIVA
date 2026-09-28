@@ -21,6 +21,10 @@ if (isPostgres) {
         console.error("PostgreSQL Pool Error:", err.message);
     });
 
+    // Auto-create tables & seed admin in PostgreSQL
+    const initPostgres = require("./initPostgres");
+    initPostgres(pool).catch((e) => console.warn("InitPostgres async note:", e.message));
+
     // Helper untuk mentranslasikan query MySQL/SQLite ke PostgreSQL
     function convertSqliteToPostgres(sql) {
         if (!sql || typeof sql !== "string") return sql;
