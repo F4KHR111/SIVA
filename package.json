@@ -1,8 +1,22 @@
 {
-  "name": "siva-monorepo",
+  "name": "siva-root",
   "version": "1.0.0",
   "private": true,
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.2",
+    "otplib": "^13.5.0",
+    "pg": "^8.23.0",
+    "prisma": "^6.4.1",
+    "qrcode": "^1.5.4",
+    "xlsx": "^0.18.5"
+  },
   "scripts": {
-    "postinstall": "cd backend && npm run postinstall"
+    "postinstall": "cd backend && npx prisma generate"
   }
 }
