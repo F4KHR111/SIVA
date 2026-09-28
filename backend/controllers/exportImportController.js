@@ -5,12 +5,17 @@ const ExcelJS = require("exceljs");
 
 // Folder tempat simpan file export
 const os = require("os");
-const documentsDir = path.join(os.homedir(), "Documents", "InventarisGedungAgung");
-const EXPORTS_DIR = path.join(documentsDir, "exports");
+const EXPORTS_DIR = process.env.VERCEL
+    ? path.join(os.tmpdir(), "exports")
+    : path.join(os.homedir(), "Documents", "InventarisGedungAgung", "exports");
 
-// Pastikan folder exports ada
-if (!fs.existsSync(EXPORTS_DIR)) {
-    fs.mkdirSync(EXPORTS_DIR, { recursive: true });
+// Pastikan folder exports ada dengan aman tanpa melempar unhandled exception di cloud
+try {
+    if (!fs.existsSync(EXPORTS_DIR)) {
+        fs.mkdirSync(EXPORTS_DIR, { recursive: true });
+    }
+} catch (e) {
+    console.warn("Peringatan: Gagal membuat folder exports:", e.message);
 }
 
 // ==========================
@@ -1767,11 +1772,16 @@ const importPenerimaanBarang = async (req, res) => {
 
 const openExportsFolder = async (req, res) => {
     try {
+        if (process.env.VERCEL) {
+            return res.json({ success: true, message: "Membuka folder lokal tidak didukung di lingkungan cloud Vercel." });
+        }
         const { exec } = require("child_process");
 
-        if (!fs.existsSync(EXPORTS_DIR)) {
-            fs.mkdirSync(EXPORTS_DIR, { recursive: true });
-        }
+        try {
+            if (!fs.existsSync(EXPORTS_DIR)) {
+                fs.mkdirSync(EXPORTS_DIR, { recursive: true });
+            }
+        } catch (e) {}
 
         let command = "";
         if (process.platform === "win32") {
