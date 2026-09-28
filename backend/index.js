@@ -28,7 +28,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Root Endpoint (Tampilan saat membuka URL backend langsung di browser)
+// Health Check Helper
+const sendHealth = (req, res) => {
+    res.json({
+        status: "ok",
+        message: "SIVA API Backend siap dan berjalan",
+        database: db.isPostgres 
+            ? "PostgreSQL (Vercel/Cloud)" 
+            : (process.env.VERCEL ? "Perhatian: DATABASE_URL belum diset di Vercel" : "MySQL (Lokal)"),
+        timestamp: new Date().toISOString()
+    });
+};
+
+// Root & Health Endpoints
 app.get("/", (req, res) => {
     res.json({
         name: "SIVA API Server",
@@ -41,31 +53,30 @@ app.get("/", (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
+app.get("/health", sendHealth);
+app.get("/api/health", sendHealth);
 
-// Health Check Endpoint (berguna untuk verifikasi deployment Vercel)
-app.get("/api/health", (req, res) => {
-    res.json({
-        status: "ok",
-        message: "SIVA API Backend siap dan berjalan",
-        database: db.isPostgres 
-            ? "PostgreSQL (Vercel/Cloud)" 
-            : (process.env.VERCEL ? "Perhatian: DATABASE_URL belum diset di Vercel" : "MySQL (Lokal)"),
-        timestamp: new Date().toISOString()
-    });
+// Daftar modul rute backend
+const routeList = [
+    ["/auth", authRoutes],
+    ["/barang", barangRoutes],
+    ["/dashboard", dashboardRoutes],
+    ["/data", exportImportRoutes],
+    ["/kategori", kategoriRoutes],
+    ["/lokasi", lokasiRoutes],
+    ["/satuan", satuanRoutes],
+    ["/users", userRoutes],
+    ["/nama-barang", namaBarangRoutes],
+    ["/pemakaian", pemakaianRoutes],
+    ["/settings", settingRoutes],
+];
+
+// Registrasikan rute dengan awalan /api DAN tanpa /api agar tidak terpengaruh rewrite Vercel
+routeList.forEach(([routePath, handler]) => {
+    app.use(`/api${routePath}`, handler);
+    app.use(routePath, handler);
 });
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/barang", barangRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/data", exportImportRoutes);
-app.use("/api/kategori", kategoriRoutes);
-app.use("/api/lokasi", lokasiRoutes);
-app.use("/api/satuan", satuanRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/nama-barang", namaBarangRoutes);
-app.use("/api/pemakaian", pemakaianRoutes);
-app.use("/api/settings", settingRoutes);
 
 // Serve static frontend files (jika ada build lokal)
 app.use(express.static(path.join(__dirname, "public")));
