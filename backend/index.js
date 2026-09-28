@@ -56,6 +56,22 @@ app.get("/", (req, res) => {
 app.get("/health", sendHealth);
 app.get("/api/health", sendHealth);
 
+// Inisialisasi Database Endpoint (berguna untuk manual trigger & diagnostic)
+const handleInitDb = async (req, res) => {
+    try {
+        if (!db.isPostgres || !db.pool) {
+            return res.json({ success: true, message: "Database bukan PostgreSQL atau berjalan di lingkungan lokal." });
+        }
+        const initPostgres = require("./initPostgres");
+        const result = await initPostgres(db.pool);
+        res.json({ success: true, result });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message, stack: err.stack });
+    }
+};
+app.get("/init-db", handleInitDb);
+app.get("/api/init-db", handleInitDb);
+
 // Daftar modul rute backend
 const routeList = [
     ["/auth", authRoutes],

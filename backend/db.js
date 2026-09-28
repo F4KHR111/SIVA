@@ -23,7 +23,19 @@ if (isPostgres) {
 
     // Auto-create tables & seed admin in PostgreSQL
     const initPostgres = require("./initPostgres");
-    initPostgres(pool).catch((e) => console.warn("InitPostgres async note:", e.message));
+    let initPromise = null;
+    function ensureInit() {
+        if (!initPromise) {
+            initPromise = initPostgres(pool).catch((e) => {
+                console.error("InitPostgres error:", e.message);
+                initPromise = null;
+                throw e;
+            });
+        }
+        return initPromise;
+    }
+    // Jalankan init di latar belakang saat startup
+    ensureInit().catch((e) => console.warn("InitPostgres startup note:", e.message));
 
     // Helper untuk mentranslasikan query MySQL/SQLite ke PostgreSQL
     function convertSqliteToPostgres(sql) {
@@ -44,6 +56,7 @@ if (isPostgres) {
     db = {
         isPostgres: true,
         pool,
+        initPostgres: () => ensureInit(),
 
         all(sql, params, callback) {
             if (typeof params === "function") {
@@ -53,7 +66,8 @@ if (isPostgres) {
             params = params || [];
             const convertedSql = convertSqliteToPostgres(sql);
 
-            pool.query(convertedSql, params)
+            ensureInit()
+                .then(() => pool.query(convertedSql, params))
                 .then((res) => {
                     if (typeof callback === "function") {
                         callback(null, res.rows || []);
@@ -78,7 +92,8 @@ if (isPostgres) {
             params = params || [];
             const convertedSql = convertSqliteToPostgres(sql);
 
-            pool.query(convertedSql, params)
+            ensureInit()
+                .then(() => pool.query(convertedSql, params))
                 .then((res) => {
                     const row = res.rows && res.rows.length > 0 ? res.rows[0] : null;
                     if (typeof callback === "function") {
@@ -109,7 +124,8 @@ if (isPostgres) {
                 convertedSql += " RETURNING id";
             }
 
-            pool.query(convertedSql, params)
+            ensureInit()
+                .then(() => pool.query(convertedSql, params))
                 .then((res) => {
                     const lastID = res.rows && res.rows.length > 0 && res.rows[0].id ? res.rows[0].id : 0;
                     const changes = res.rowCount || 0;
